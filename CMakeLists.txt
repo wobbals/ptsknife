@@ -18,19 +18,29 @@ pkg_check_modules (LIBSWSCALE REQUIRED libswscale)
 pkg_check_modules (LIBSWRESAMPLE REQUIRED libswresample)
 
 # Repair broken -framework flags from pkg_check_modules
+# Why is this still a thing???? :-(
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   function(repair_framework_flags BAD_FLAG)
-    string(REPLACE "-framework;" "-framework " GOOD_FLAG "${BAD_FLAG}")
+    string(REPLACE "-framework -l" "-framework " GOOD_FLAG "${BAD_FLAG}")
+    string(REPLACE "-framework;" "-framework " GOOD_FLAG "${GOOD_FLAG}")
+    string(REPLACE "-framework," "-framework " GOOD_FLAG "${GOOD_FLAG}")
+    string(REPLACE "-Wl,-framework" "-framework" GOOD_FLAG "${GOOD_FLAG}")
     set(REPAIRED_FLAG "${GOOD_FLAG}" PARENT_SCOPE)
   endfunction()
   # "-framework;Security;-framework;CoreFoundation" to
   # "-framework Security;-framework CoreFoundation"
   repair_framework_flags("${LIBAVCODEC_LDFLAGS}")
   set(LIBAVCODEC_LDFLAGS "${REPAIRED_FLAG}")
+  repair_framework_flags("${LIBAVUTIL_LDFLAGS}")
+  set(LIBAVUTIL_LDFLAGS "${REPAIRED_FLAG}")
   repair_framework_flags("${LIBAVFORMAT_LDFLAGS}")
   set(LIBAVFORMAT_LDFLAGS "${REPAIRED_FLAG}")
   repair_framework_flags("${LIBAVFILTER_LDFLAGS}")
   set(LIBAVFILTER_LDFLAGS "${REPAIRED_FLAG}")
+  repair_framework_flags("${LIBSWSCALE_LDFLAGS}")
+  set(LIBSWSCALE_LDFLAGS "${REPAIRED_FLAG}")
+  repair_framework_flags("${LIBSWRESAMPLE_LDFLAGS}")
+  set(LIBSWRESAMPLE_LDFLAGS "${REPAIRED_FLAG}")
 endif()
 
 link_libraries (${LIBAVCODEC_LDFLAGS})
